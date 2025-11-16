@@ -9,12 +9,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 
-// --- IMPORTANT ---
-// Make sure you have these assets in your project:
-// 1. assets/images/Mascot.svg (already exists)
-// 2. assets/images/coin.svg (you need to add this one)
-// -----------------
-import Mascot from '../assets/images/Mascot1.svg';
+import Mascot from '../assets/images/Mascot.svg';
 import Coin from '../assets/images/coin.svg';
 
 const LESSON_DATA = [
@@ -56,10 +51,25 @@ function LessonCard({
   title,
   description,
   points,
-}: (typeof LESSON_DATA)[0]) {
+  isCurrent = false,
+}: (typeof LESSON_DATA)[0] & { isCurrent?: boolean }) {
+  const router = useRouter();
+
   return (
-    <TouchableOpacity style={styles.lessonCard}>
-      <Text style={styles.lessonNumber}>{number}</Text>
+    <TouchableOpacity
+      style={[
+        styles.lessonCard,
+        isCurrent && styles.currentLessonCard, // Apply glow/shadow
+      ]}
+      onPress={() =>
+        router.push({
+          pathname: '/lesson/[id]',
+          params: { id: number },
+        })
+      }>
+      <Text style={[styles.lessonNumber, isCurrent && styles.currentLessonNumber]}>
+        {number}
+      </Text>
       <View style={styles.lessonContent}>
         <Text style={styles.lessonTitle}>{title}</Text>
         <Text style={styles.lessonDescription}>{description}</Text>
@@ -82,10 +92,12 @@ export default function LessonsScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         {/* Current Lesson Section */}
         <View style={styles.currentSection}>
-          <Mascot width={100} height={100} style={styles.mascot} />
-          <Text style={styles.currentText}>CURRENT!</Text>
+          <Mascot width={140} height={140} style={styles.mascot} />
+          <View style={styles.currentTag}>
+            <Text style={styles.currentTagText}>CURRENT LESSON</Text>
+          </View>
         </View>
-        <LessonCard {...currentLesson} />
+        <LessonCard {...currentLesson} isCurrent={true} />
 
         {/* More Lessons Section */}
         <Text style={styles.moreLessonsTitle}>MORE LESSONS</Text>
@@ -104,52 +116,80 @@ const styles = StyleSheet.create({
   },
   container: {
     paddingHorizontal: 15,
-    paddingTop: 20,
+    paddingTop: 50, // <-- FIX 1: Changed from 10 to 50 to move cow down from header
     paddingBottom: 30,
   },
   currentSection: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    marginLeft: 10,
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    height: 90,
+    marginBottom: -40, // This pulls the card UP by 40px
+    paddingHorizontal: 10,
+    // zIndex: 10, // <-- FIX 2: Removed zIndex so card renders ON TOP
   },
   mascot: {
-    marginRight: 10,
+    transform: [{ translateX: -15 }],
   },
-  currentText: {
+  currentTag: {
+    backgroundColor: '#388e3c',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#4CAF50',
+    transform: [{ translateY: -30 }],
+    shadowColor: '#388e3c',
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  currentTagText: {
     color: '#FFFFFF',
-    fontSize: 24,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   moreLessonsTitle: {
-    color: '#B0B0B0',
-    fontSize: 16,
+    color: '#777',
+    fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginVertical: 20,
+    marginVertical: 25,
     letterSpacing: 1,
   },
   lessonCard: {
-    backgroundColor: '#2C2C2E', // Dark grey card
+    backgroundColor: '#2C2C2E',
     borderRadius: 20,
-    paddingVertical: 15,
-    paddingHorizontal: 20,
+    padding: 15,
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 8,
     borderWidth: 1,
     borderColor: '#444',
   },
+  currentLessonCard: {
+    // paddingTop: 45, // <-- FIX 3: Removed this, not needed
+    paddingLeft: 20,
+    backgroundColor: '#222',
+    borderColor: '#388e3c',
+    shadowColor: '#388e3c',
+    shadowOpacity: 0.7,
+    shadowRadius: 15,
+    shadowOffset: { width: 0, height: 0 },
+  },
   lessonNumber: {
-    color: '#FFFFFF',
-    fontSize: 80, // Large number
-    fontWeight: 'bold',
-    fontFamily: 'monospace', // Gives a blocky, pixel-like feel
+    color: '#555',
+    fontSize: 80,
+    fontWeight: '900',
+    fontFamily: 'monospace',
     marginRight: 15,
-    lineHeight: 80, // Match font size to prevent extra spacing
+    lineHeight: 80,
+  },
+  currentLessonNumber: {
+    color: '#FFFFFF',
   },
   lessonContent: {
-    flex: 1, // Take remaining space
+    flex: 1,
   },
   lessonTitle: {
     color: '#FFFFFF',
@@ -161,6 +201,7 @@ const styles = StyleSheet.create({
     color: '#B0B0B0',
     fontSize: 14,
     lineHeight: 20,
+    marginBottom: 5,
   },
   pointsContainer: {
     flexDirection: 'row',
@@ -171,7 +212,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   pointsText: {
-    color: '#FDD835', // Gold/Yellow color
+    color: '#FDD835',
     fontSize: 18,
     fontWeight: 'bold',
   },

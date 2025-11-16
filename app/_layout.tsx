@@ -61,17 +61,54 @@ export default function OnboardingLayout() {
             headerRight: () => <HeaderText />,
           }}
         />
-        {/* ADD THIS NEW SCREEN FOR THE LESSONS PAGE */}
         <Stack.Screen
           name="lessons"
           options={{
             headerShown: true,
             headerStyle: { backgroundColor: '#388e3c' },
-            headerTitle: 'LESSONS', // Set title as per design
+            headerTitle: '',
+            headerShadowVisible: false,
+            headerLeft: () => <HeaderLogo />,
+            headerRight: () => <HeaderText />,
+          }}
+        />
+        <Stack.Screen
+          name="lesson/[id]"
+          options={{
+            headerShown: true,
+            headerStyle: { backgroundColor: '#388e3c' },
+            headerTitle: 'LESSON',
             headerTitleStyle: { color: '#FFFFFF', fontWeight: 'bold' },
             headerShadowVisible: false,
             headerLeft: () => <HeaderLogo />,
             headerRight: () => <HeaderText />,
+            headerTintColor: '#FFFFFF',
+          }}
+        />
+        <Stack.Screen
+          name="quiz/[id]"
+          options={{
+            headerShown: true,
+            headerStyle: { backgroundColor: '#388e3c' },
+            headerTitle: 'LESSON q',
+            headerTitleStyle: { color: '#FFFFFF', fontWeight: 'bold' },
+            headerShadowVisible: false,
+            headerLeft: () => <HeaderLogo />,
+            headerRight: () => <HeaderText />,
+            headerTintColor: '#FFFFFF',
+          }}
+        />
+        {/* ADD THIS NEW SCREEN FOR COMPLETION PAGE */}
+        <Stack.Screen
+          name="complete/[id]"
+          options={{
+            headerShown: true,
+            headerStyle: { backgroundColor: '#388e3c' },
+            headerTitle: '', // No title, just the logo/name
+            headerShadowVisible: false,
+            headerLeft: () => <HeaderLogo />,
+            headerRight: () => <HeaderText />,
+            headerTintColor: '#FFFFFF',
           }}
         />
       </Stack>
@@ -88,21 +125,18 @@ const styles = StyleSheet.create({
   },
   headerTextContainer: {
     marginRight: 15,
-    width: 100,
     alignItems: 'flex-end',
   },
   headerKhet: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
-    letterSpacing: 2.5,
-    textAlign: 'right',
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '900',
+    letterSpacing: 1,
   },
   headerSudhar: {
-    color: '#fff',
-    fontSize: 22,
+    color: '#FFFFFF',
+    fontSize: 20,
     fontWeight: '500',
-    textAlign: 'right',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
 });
