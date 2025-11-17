@@ -8,14 +8,9 @@ import {
   SafeAreaView,
 } from 'react-native';
 
-// --- IMPORTANT ---
-// Make sure these assets exist:
 import Checkmark from '../../assets/images/check.svg';
 import Coin from '../../assets/images/coin.svg';
-// -----------------
 
-// We need to know the lesson info to show the title and reward
-// This is a temporary data store.
 const LESSON_INFO: { [key: string]: any } = {
   '1': {
     title: 'Basics of Sustainable Banana Farming in Kerala',
@@ -31,13 +26,17 @@ export default function LessonCompleteScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  // Get the lesson info, or default to lesson 1
   const lesson = LESSON_INFO[id] || LESSON_INFO['1'];
 
+  // --- THIS IS THE CHANGE ---
   const handleContinue = () => {
-    // Go back to the main lessons list
-    router.push('/lessons');
+    // Go to the new REWARD screen
+    router.push({
+      pathname: '/reward/[id]',
+      params: { id: id },
+    });
   };
+  // -------------------------
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -74,6 +73,7 @@ export default function LessonCompleteScreen() {
   );
 }
 
+// Styles are the same as before
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -110,12 +110,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   card: {
-    backgroundColor: '#388e3c', // Green card
+    backgroundColor: '#2E7D32', // Darker green card
     borderRadius: 20,
     padding: 20,
     alignItems: 'center',
     flexGrow: 1,
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#388E3C',
   },
   checkmark: {
     marginBottom: 20,
@@ -127,6 +129,9 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
     letterSpacing: 1,
     marginBottom: 20,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 1,
   },
   rewardContainer: {
     alignItems: 'center',
@@ -136,6 +141,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     fontFamily: 'monospace',
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   pointsContainer: {
     flexDirection: 'row',
@@ -151,13 +159,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   continueButton: {
-    backgroundColor: '#388e3c',
+    backgroundColor: '#4CAF50', // Brighter green button
     width: '100%',
     paddingVertical: 16,
     borderRadius: 30,
     marginTop: 20,
     borderWidth: 2,
-    borderColor: '#4CAF50',
+    borderColor: '#66BB6A', // Lighter border
   },
   continueButtonText: {
     color: '#FFFFFF',
