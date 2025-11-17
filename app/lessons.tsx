@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router'; // Import useLocalSearchParams
 import React from 'react';
 import {
   View,
@@ -11,56 +11,83 @@ import {
 
 import Mascot from '../assets/images/Mascot.svg';
 import Coin from '../assets/images/coin.svg';
+import MascotFarmer from '../assets/images/MascotFarmer.svg';
 
-const LESSON_DATA = [
+// --- THIS IS THE FULL LIST OF LESSONS ---
+// We've added Lesson 6 with a 'theme'
+const ALL_LESSONS = [
   {
     number: '1',
     title: 'Basics of Sustainable Farming',
-    description: "How to grow plants sustainably in Kerala's climate to save money, improve quality",
+    description: "How to grow plants sustainably...",
     points: 1000,
+    status: 'locked',
   },
   {
     number: '2',
     title: 'Healthy Soil for Better Plants',
-    description: 'How to make soil rich with banana waste compost, no chemicals for healthier banana plants.',
+    description: 'How to make soil rich with banana waste compost...',
     points: 1500,
+    status: 'locked',
   },
   {
     number: '3',
     title: 'Shade and Plant Diversity for Bananas',
-    description: 'How to use shade trees and mixed crops to protect bananas, save water, and stop pests naturally.',
+    description: 'How to use shade trees and mixed crops...',
     points: 1000,
+    status: 'locked',
   },
   {
     number: '4',
     title: 'Smart Water Use for Banana Farms',
-    description: 'How to save water with mulching and drip irrigation to keep banana plants healthy in dry times.',
+    description: 'How to save water with mulching and drip...',
     points: 1500,
+    status: 'locked',
   },
   {
     number: '5',
     title: 'Natural Pest Control and Clean Harvesting',
-    description: 'How to stop pests with neem, pick ripe bananas, and dry them for high-quality, chemical-free sales.',
+    description: 'How to stop pests with neem, pick ripe bananas...',
     points: 1000,
+    status: 'locked',
+  },
+  {
+    number: '6', // The new lesson
+    title: 'Women-Led Sustainable Farming in Kerala',
+    description: 'Learn from women farmers in Kerala who grow...',
+    points: 1000,
+    status: 'locked',
+    theme: 'women', // The new property for pink style
   },
 ];
+// ----------------------------------------
 
 // Reusable Lesson Card Component
 function LessonCard({
-  number,
-  title,
-  description,
-  points,
+  lesson,
   isCurrent = false,
-}: (typeof LESSON_DATA)[0] & { isCurrent?: boolean }) {
+}: {
+  lesson: (typeof ALL_LESSONS)[0];
+  isCurrent?: boolean;
+}) {
   const router = useRouter();
+  const { number, title, description, points, status, theme } = lesson;
+
+  // --- STYLE LOGIC UPDATED ---
+  // It now also checks for the 'women' theme
+  const cardStyle = [
+    styles.lessonCard,
+    isCurrent && styles.currentLessonCard,
+    status === 'completed' && styles.completedLessonCard,
+    status === 'locked' && styles.lockedLessonCard,
+    theme === 'women' && status !== 'completed' && styles.womenLessonCard,
+  ];
+  // -------------------------
 
   return (
     <TouchableOpacity
-      style={[
-        styles.lessonCard,
-        isCurrent && styles.currentLessonCard, // Apply glow/shadow
-      ]}
+      style={cardStyle}
+      disabled={status === 'locked'}
       onPress={() =>
         router.push({
           pathname: '/lesson/[id]',
@@ -72,7 +99,9 @@ function LessonCard({
       </Text>
       <View style={styles.lessonContent}>
         <Text style={styles.lessonTitle}>{title}</Text>
-        <Text style={styles.lessonDescription}>{description}</Text>
+        {status !== 'completed' && (
+          <Text style={styles.lessonDescription}>{description}</Text>
+        )}
         <View style={styles.pointsContainer}>
           <Coin width={24} height={24} style={styles.coinIcon} />
           <Text style={styles.pointsText}>{points}</Text>
@@ -83,27 +112,77 @@ function LessonCard({
 }
 
 export default function LessonsScreen() {
-  const router = useRouter();
-  const currentLesson = LESSON_DATA[0];
-  const moreLessons = LESSON_DATA.slice(1);
+  // --- THIS IS THE NEW DYNAMIC LOGIC ---
+  // Read the signal from the URL (e.g., lesson_completed=2)
+  const { lesson_completed } = useLocalSearchParams<{ lesson_completed?: string }>();
+  
+  // Get the number of the last completed lesson
+  // If nothing is passed, default to '0' (meaning no lessons are complete)
+  const lastCompletedId = parseInt(lesson_completed || '0', 10);
+
+  // Dynamically set status for all lessons
+  const LESSON_DATA = ALL_LESSONS.map((lesson) => {
+    const lessonId = parseInt(lesson.number, 10);
+    let status = 'locked'; // Default
+    if (lessonId <= lastCompletedId) {
+      status = 'completed';
+    } else if (lessonId === lastCompletedId + 1) {
+      // This is the next lesson
+      status = 'current';
+    }
+    return { ...lesson, status };
+  });
+  // ------------------------------------
+
+  // The rest of the page just works with the new dynamic data
+  const currentLesson = LESSON_DATA.find((l) => l.status === 'current');
+  const completedLessons = LESSON_DATA.filter((l) => l.status === 'completed');
+  const upcomingLessons = LESSON_DATA.filter(
+    (l) => l.status !== 'current' && l.status !== 'completed'
+  );
+
+  const totalScore = completedLessons.reduce((sum, l) => sum + l.points, 0);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         {/* Current Lesson Section */}
-        <View style={styles.currentSection}>
-          <Mascot width={140} height={140} style={styles.mascot} />
-          <View style={styles.currentTag}>
-            <Text style={styles.currentTagText}>CURRENT LESSON</Text>
-          </View>
-        </View>
-        <LessonCard {...currentLesson} isCurrent={true} />
+        {currentLesson && (
+          <>
+            <View style={styles.currentSection}>
+              <Mascot width={140} height={140} style={styles.mascot} />
+              <View style={styles.currentTag}>
+                <Text style={styles.currentTagText}>CURRENT LESSON</Text>
+              </View>
+            </View>
+            <LessonCard lesson={currentLesson} isCurrent={true} />
+          </>
+        )}
 
-        {/* More Lessons Section */}
-        <Text style={styles.moreLessonsTitle}>MORE LESSONS</Text>
-        {moreLessons.map((lesson) => (
-          <LessonCard key={lesson.number} {...lesson} />
-        ))}
+        {/* Upcoming Lessons Section */}
+        {upcomingLessons.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>UPCOMING LESSONS</Text>
+            {upcomingLessons.map((lesson) => (
+              <LessonCard key={lesson.number} lesson={lesson} />
+            ))}
+          </>
+        )}
+
+        {/* Recently Completed Section */}
+        {completedLessons.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>RECENTLY COMPLETED LESSON</Text>
+            <View style={styles.completedSectionHeader}>
+              <MascotFarmer width={100} height={100} style={styles.farmerMascot} />
+              <Text style={styles.totalScore}>TOTALSCORE {totalScore}</Text>
+            </View>
+            {/* Sort completed lessons in reverse order so latest is first */}
+            {completedLessons.sort((a, b) => parseInt(b.number) - parseInt(a.number)).map((lesson) => (
+              <LessonCard key={lesson.number} lesson={lesson} />
+            ))}
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -112,11 +191,11 @@ export default function LessonsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#151718', // Dark background
+    backgroundColor: '#151718',
   },
   container: {
     paddingHorizontal: 15,
-    paddingTop: 50, // <-- FIX 1: Changed from 10 to 50 to move cow down from header
+    paddingTop: 50,
     paddingBottom: 30,
   },
   currentSection: {
@@ -124,9 +203,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-between',
     height: 90,
-    marginBottom: -40, // This pulls the card UP by 40px
+    marginBottom: -40,
     paddingHorizontal: 10,
-    // zIndex: 10, // <-- FIX 2: Removed zIndex so card renders ON TOP
+    zIndex: 10,
   },
   mascot: {
     transform: [{ translateX: -15 }],
@@ -149,7 +228,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
-  moreLessonsTitle: {
+  sectionTitle: {
     color: '#777',
     fontSize: 14,
     fontWeight: 'bold',
@@ -168,7 +247,6 @@ const styles = StyleSheet.create({
     borderColor: '#444',
   },
   currentLessonCard: {
-    // paddingTop: 45, // <-- FIX 3: Removed this, not needed
     paddingLeft: 20,
     backgroundColor: '#222',
     borderColor: '#388e3c',
@@ -177,6 +255,25 @@ const styles = StyleSheet.create({
     shadowRadius: 15,
     shadowOffset: { width: 0, height: 0 },
   },
+  lockedLessonCard: {
+    backgroundColor: '#222',
+    opacity: 0.6,
+  },
+  completedLessonCard: {
+    backgroundColor: '#2E7D32',
+    borderColor: '#388E3C',
+    paddingLeft: 20,
+  },
+  // --- NEW PINK STYLE ---
+  womenLessonCard: {
+    backgroundColor: '#4A148C', // Dark Purple/Pink
+    borderColor: '#C2185B', // Hot Pink Border
+    // Pink Glow
+    shadowColor: '#C2185B',
+    shadowOpacity: 0.7,
+    shadowRadius: 10,
+  },
+  // ----------------------
   lessonNumber: {
     color: '#555',
     fontSize: 80,
@@ -215,5 +312,22 @@ const styles = StyleSheet.create({
     color: '#FDD835',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  completedSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  farmerMascot: {
+    width: 100,
+    height: 100,
+  },
+  totalScore: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: 'bold',
+    fontFamily: 'monospace',
   },
 });
