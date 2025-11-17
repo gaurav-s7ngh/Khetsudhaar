@@ -97,7 +97,7 @@ export default function DashboardScreen() {
             <HubButton
               label="QUESTS"
               icon={<Quest width={80} height={80} />}
-              onPress={() => router.push('/quiz')} // Links directly to /quests
+              onPress={() => router.push('/quests')} // <-- UPDATED: Links directly to /quests
               style={[styles.buttonSquare, styles.questsButton]}
               textStyle={styles.squareButtonText}
             />
@@ -135,14 +135,15 @@ export default function DashboardScreen() {
             />
           </View>
           {/* --- NEW MARKET PRICES TILE --- */}
-          <View style={styles.gridRow}>
-            <HubButton
-              label="MARKET PRICES"
-              icon={<MarketPrice width={80} height={80} />}
-              onPress={() => router.push('/marketPrices' as any)} // <-- FIX HERE
-              style={[styles.buttonRect, styles.marketButton]}
-              textStyle={styles.rectButtonText}
-            />
+         <View style={styles.gridRow}>
+            // In dashboard.tsx
+<HubButton
+  label="MARKET PRICES"
+  icon={<MarketPrice width={80} height={80} />}
+  onPress={() => router.push('/marketPrices' as any)} // <-- FIX
+  style={[styles.buttonRect, styles.marketButton]}
+  textStyle={styles.rectButtonText}
+/>
           </View>
         </View>
       </ScrollView>

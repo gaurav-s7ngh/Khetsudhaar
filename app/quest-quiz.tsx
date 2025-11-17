@@ -45,15 +45,17 @@ export default function QuizScreen() {
         setIsCorrect(correct);
         setIsAnswerSubmitted(true);
 
-        if (correct) {
-            // --- 
-            // FIX: Navigate to the quest completion screen
-            // ---
-            setTimeout(() => {
-                router.push('/quest-complete'); 
-            }, 2000);
-        }
-    };
+       // In app/quest-quiz.tsx
+// In app/quest-quiz.tsx
+const handleSubmit = () => {
+    // ... (code) ...
+    if (correct) {
+        // FIX: Navigate to the quest completion screen
+        setTimeout(() => {
+            router.push('/quest-complete'); // <--- THIS IS THE FIX
+        }, 2000);
+    }
+};
     
     // Logic to reset the quiz for 'Try Again'
     const handleTryAgain = () => {
@@ -300,4 +302,4 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
-});
+})};

@@ -1,19 +1,23 @@
+import { FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons'; 
 
 // Importing your existing Coin asset
 import Coin from '../assets/images/coin.svg';
 
 export default function QuestCompleteScreen() {
   const router = useRouter();
+
+  // --- FIX: This handler now replaces the current screen with the dashboard ---
+  const handleContinue = () => {
+    router.replace('/dashboard');
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -60,7 +64,7 @@ export default function QuestCompleteScreen() {
         {/* Continue Button */}
         <TouchableOpacity 
           style={styles.continueButton} 
-          onPress={() => router.back()} // Or router.push('/dashboard')
+          onPress={handleContinue} // --- ROUTING FIX APPLIED HERE ---
         >
           <Text style={styles.continueButtonText}>CONTINUE</Text>
         </TouchableOpacity>
@@ -69,7 +73,7 @@ export default function QuestCompleteScreen() {
     </SafeAreaView>
   );
 }
-
+// Styles (No changes needed)
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
