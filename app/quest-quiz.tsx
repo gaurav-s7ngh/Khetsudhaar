@@ -38,32 +38,28 @@ export default function QuizScreen() {
         }
     };
 
-    const handleSubmit = () => {
+ const handleSubmit = () => {
         if (!selectedAnswer) return;
 
         const correct = selectedAnswer === QUIZ_DATA.correctAnswerId;
         setIsCorrect(correct);
         setIsAnswerSubmitted(true);
 
-       // In app/quest-quiz.tsx
-// In app/quest-quiz.tsx
-const handleSubmit = () => {
-    // ... (code) ...
-    if (correct) {
-        // FIX: Navigate to the quest completion screen
-        setTimeout(() => {
-            router.push('/quest-complete'); // <--- THIS IS THE FIX
-        }, 2000);
-    }
-};
-    
+        // Logic from the nested function has been moved here
+        if (correct) {
+            // FIX: Navigate to the quest completion screen
+            setTimeout(() => {
+                router.push('/quest-complete'); // Navigate on success
+            }, 2000);
+        }
+    }; // <-- End of the *correct* function
+
     // Logic to reset the quiz for 'Try Again'
     const handleTryAgain = () => {
         setSelectedAnswer(null);
         setIsAnswerSubmitted(false);
         setIsCorrect(false);
     };
-
     const getOptionStyle = (id: string) => {
         if (!isAnswerSubmitted) {
             return id === selectedAnswer ? styles.optionSelected : styles.optionDefault;
@@ -302,4 +298,4 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
-})};
+});
