@@ -43,24 +43,25 @@ function AppHeaderRight() {
   );
 }
 
-// --- Layout File ---
+// --- LAYOUT FILE ---
 export default function AppLayout() {
   return (
     <>
       <Stack
         screenOptions={{
-          headerShown: false, // Default to NO header
+          headerShown: false,
           contentStyle: { backgroundColor: '#151718' },
           headerStyle: { backgroundColor: '#388e3c' },
           headerShadowVisible: false,
           headerTintColor: '#FFFFFF',
-        }}>
+        }}
+      >
         
         {/* --- SCREENS WITH NO HEADER --- */}
         <Stack.Screen name="index" />
         <Stack.Screen name="login" />
 
-        {/* --- ONBOARDING & PRE-LOGIN SCREENS (Style 1) --- */}
+        {/* --- ONBOARDING & PRE-LOGIN SCREENS --- */}
         <Stack.Screen
           name="language"
           options={{
@@ -115,8 +116,8 @@ export default function AppLayout() {
             headerRight: () => <OnboardingHeaderRight />,
           }}
         />
-        
-        {/* --- MAIN APP & POST-LOGIN SCREENS (Style 2) --- */}
+
+        {/* --- MAIN APP & POST-LOGIN SCREENS --- */}
         <Stack.Screen
           name="lessons"
           options={{
@@ -144,7 +145,6 @@ export default function AppLayout() {
             headerRight: () => <AppHeaderRight />,
           }}
         />
-        {/* ADD THE NEW REWARD ROOT PAGE HERE */}
         <Stack.Screen
           name="reward-root"
           options={{
@@ -154,14 +154,24 @@ export default function AppLayout() {
             headerRight: () => <AppHeaderRight />,
           }}
         />
+        <Stack.Screen
+          name="leaderboard"
+          options={{
+            headerShown: true,
+            headerTitle: 'LEADERBOARD',
+            headerLeft: () => <AppHeaderLeft />,
+            headerRight: () => <AppHeaderRight />,
+          }}
+        />
+
       </Stack>
+
       <StatusBar style="light" />
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  // --- Style 1 (Onboarding) ---
   logoLeft: {
     width: 40,
     height: 40,
@@ -183,8 +193,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     letterSpacing: 0.5,
   },
-  
-  // --- Style 2 (App) ---
   logoRight: {
     width: 40,
     height: 40,

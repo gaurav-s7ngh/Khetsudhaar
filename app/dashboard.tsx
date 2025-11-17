@@ -1,156 +1,147 @@
+import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { Image, SafeAreaView, ScrollView, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 
 // --- Import SVG Assets ---
-// We are only importing files we know you have
-import Checkmark from '../assets/images/check.svg';
-import CoinIcon from '../assets/images/coin.svg';
-// We will use these as placeholders for the missing icons
+import Coin from '../assets/images/coin.svg';
+import LeaderBoard from '../assets/images/LeaderBoard.svg';
+import Lessons from '../assets/images/Lessons.svg';
+import MarketPrice from '../assets/images/market-price.svg'; // <-- 1. ADDED THIS IMPORT
+import MascotFarmer from '../assets/images/MascotFarmer.svg';
+import Quest from '../assets/images/Quest.svg';
+import Reward from '../assets/images/Reward.svg';
 
-// --- REMOVED THE 5 MISSING SVGs (Fertilizer, LeaderBoard, etc.) ---
+const PIXEL_FONT = 'monospace';
 
-const PIXEL_FONT = 'monospace'; // Use monospace for a pixel-like font
-
-/**
- * A reusable component for the top stat boxes
- */
-const StatBox = ({ label, value }: { label: string; value: string }) => (
-  <View style={styles.statBox}>
-    <Text style={styles.statLabel}>{label}</Text>
-    <Text style={styles.statValue}>{value}</Text>
-  </View>
+// --- Helper component for the 4 big buttons ---
+const HubButton = ({
+  icon,
+  label,
+  onPress,
+  style,
+  textStyle,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onPress: () => void;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: object;
+}) => (
+  <TouchableOpacity style={[styles.buttonBase, style]} onPress={onPress}>
+    {icon}
+    <Text style={[styles.buttonText, textStyle]}>{label}</Text>
+  </TouchableOpacity>
 );
 
-/**
- * A reusable component for each node on the reward path
- */
-const RewardNode = ({
-  side,
-  icon,
-  points,
-  text,
-  isUnlocked,
-  isTurquoise,
-  style, // This prop is used for positioning
-}: {
-  side: 'left' | 'right';
-  icon: React.ReactNode;
-  points: string;
-  text: string;
-  isUnlocked?: boolean;
-  isTurquoise?: boolean;
-  style?: ViewStyle;
-}) => {
-  const nodeStyles = [
-    styles.node,
-    side === 'left' ? styles.nodeLeft : styles.nodeRight,
-    style, // Apply the positioning style
-  ];
-  const branchStyles = [
-    styles.branch,
-    side === 'left' ? styles.branchLeft : styles.branchRight,
-    isTurquoise ? styles.branchTurquoise : null,
-  ];
-  
-  const textContainerStyles = [
-    styles.nodeTextContainer,
-    side === 'left' ? styles.nodeTextContainerLeft : null,
-  ];
-
-  return (
-    <View style={nodeStyles}>
-      <View style={branchStyles} />
-      {/* Container for the icon and text */}
-      <View
-        style={[
-          styles.nodeContent,
-          side === 'left' ? styles.nodeContentLeft : styles.nodeContentRight,
-        ]}>
-        {/* Icon */}
-        <View style={styles.nodeIconContainer}>{icon}</View>
-        
-        {/* Text content */}
-        <View style={textContainerStyles}>
-          <View style={styles.nodePointsContainer}>
-            <Text style={styles.nodePoints}>{points}</Text>
-            <CoinIcon width={16} height={16} style={styles.nodeCoinIcon} />
-          </View>
-          <Text style={styles.nodeText}>{text}</Text>
-        </View>
-
-        {/* Checkmark */}
-        {isUnlocked && (
-          <View style={styles.checkmark}>
-            <Checkmark width={24} height={24} />
-          </View>
-        )}
-      </View>
-    </View>
-  );
-};
-
-/**
- * The main Dashboard Screen component.
- */
 export default function DashboardScreen() {
+  const router = useRouter();
+
+  const currentLesson = {
+    number: '3',
+    title: 'Shade and Plant Diversity for Bananas',
+    description:
+      'How to use shade trees and mixed crops to protect bananas, save water, and stop pests naturally.',
+    points: 1000,
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
-      {/* FIX: Removed the duplicate Header */}
-
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* --- Top Stats --- */}
-        <View style={styles.statsContainer}>
-          <StatBox label="LESSONS COMPLETED" value="2" />
-          <StatBox label="REWARDS COLLECTED" value="3" />
+        {/* --- 1. Current Lesson --- */}
+        <View style={styles.currentLessonContainer}>
+          <MascotFarmer width={120} height={120} style={styles.mascot} />
+          <TouchableOpacity
+            style={[styles.currentLessonCardBase, styles.currentLessonCardGlow]}
+            onPress={() =>
+              router.push({
+                pathname: '/lesson/[id]',
+                params: { id: currentLesson.number },
+              })
+            }>
+            <View style={styles.lessonInfo}>
+              <Text style={styles.currentLessonTitle}>CURRENT LESSON</Text>
+              <View style={styles.lessonRow}>
+                <Text style={styles.lessonNumber}>{currentLesson.number}</Text>
+                <View style={styles.lessonDetails}>
+                  <Text style={styles.lessonTitle} numberOfLines={2}>
+                    {currentLesson.title}
+                  </Text>
+                </View>
+                <View style={styles.pointsContainer}>
+                  <Coin width={20} height={20} style={styles.coinIcon} />
+                  <Text style={styles.pointsText}>{currentLesson.points}</Text>
+                </View>
+              </View>
+              <Text style={styles.lessonDescription} numberOfLines={2}>
+                {currentLesson.description}
+              </Text>
+            </View>
+          </TouchableOpacity>
         </View>
 
-        {/* --- Reward Root --- */}
-        <Text style={styles.rewardRootTitle}>REWARD ROOT</Text>
-        
-        <View style={styles.rootContainer}>
-          {/* The central vertical trunk */}
-          <View style={styles.rootTrunk} />
-
-          {/* The sprout at the bottom */}
-          <View style={styles.sproutContainer}>
-            {/* FIX: Using Applogo as a placeholder for Lessons.svg */}
-            <Image source={require('../assets/images/Applogo.png')} style={{width: 40, height: 40}} />
+        {/* --- 2. Grid Buttons (ALL BUTTONS) --- */}
+        <View style={styles.gridContainer}>
+          {/* Top Row (Squares) */}
+          <View style={styles.gridRow}>
+            <HubButton
+              label="QUESTS"
+              icon={<Quest width={80} height={80} />}
+              onPress={() => console.log('Navigate to Quests')}
+              style={[styles.buttonSquare, styles.questsButton]}
+              textStyle={styles.squareButtonText}
+            />
+            <HubButton
+              label="LEADERBOARD"
+              icon={<LeaderBoard width={80} height={80} />}
+              onPress={() => router.push('/leaderboard' as any)} // <-- THIS IS THE CHANGE
+              style={[styles.buttonSquare, styles.leaderboardButton]}
+              textStyle={styles.squareButtonText}
+            />
           </View>
 
-          {/* FIX: Apply positioning styles to each node */}
-          <View style={styles.nodeWrapperView}>
-            {/* FIX: Using Checkmark as a placeholder for missing icons */}
-            <RewardNode
-              style={styles.nodeWrapperView_node_1} // Position 1
-              side="right"
-              icon={<Checkmark width={40} height={40} />} 
-              points="1000"
-              text="3% OFF RATION"
-              isUnlocked
-              isTurquoise
+          {/* Bottom Row (Rectangles) */}
+          <View style={styles.gridRow}>
+            <HubButton
+              label="REWARDS"
+              icon={<Reward width={80} height={80} />}
+              onPress={() => router.push('/reward-root' as any)}
+              style={[styles.buttonRect, styles.rewardsButton]}
+              textStyle={styles.rectButtonText}
             />
-            <RewardNode
-              style={styles.nodeWrapperView_node_2} // Position 2
-              side="left"
-              icon={<Checkmark width={40} height={40} />}
-              points="3000"
-              text="2% DISC SEEDS"
+          </View>
+          <View style={styles.gridRow}>
+            <HubButton
+              label="LESSONS"
+              icon={<Lessons width={80} height={80} />}
+              onPress={() =>
+                router.push({
+                  pathname: '/lessons',
+                  params: { lesson_completed: '2' },
+                } as any)
+              }
+              style={[styles.buttonRect, styles.lessonsButton]}
+              textStyle={styles.rectButtonText}
             />
-            <RewardNode
-              style={styles.nodeWrapperView_node_3} // Position 3
-              side="right"
-              icon={<Checkmark width={40} height={40} />}
-              points="5000"
-              text="5% OFF RATION"
-            />
-            <RewardNode
-              style={styles.nodeWrapperView_node_4} // Position 4
-              side="left"
-              icon={<Checkmark width={40} height={40} />} 
-              points="6000"
-              text="6% OFF FERTILIZER"
+          </View>
+          {/* --- NEW MARKET PRICES TILE --- */}
+          <View style={styles.gridRow}>
+            <HubButton
+              label="MARKET PRICES"
+              icon={<MarketPrice width={80} height={80} />} // <-- 2. USED THE NEW ICON
+              onPress={() => console.log('Navigate to Market Prices')}
+              style={[styles.buttonRect, styles.marketButton]}
+              textStyle={styles.rectButtonText}
             />
           </View>
         </View>
@@ -159,185 +150,158 @@ export default function DashboardScreen() {
   );
 }
 
-// --- Styles ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1C1C1E',
   },
   scrollContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 40,
-    paddingTop: 24, 
-  },
-  // Stats
-  statsContainer: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  statBox: {
-    flex: 1,
-    backgroundColor: '#2C2C2E',
-    borderRadius: 12,
     padding: 16,
+    paddingBottom: 40, // Add space at the bottom
+  },
+  // --- Current Lesson Styles ---
+  currentLessonContainer: {
+    marginBottom: 16,
+    paddingHorizontal: 8,
+  },
+  currentLessonCardBase: {
+    backgroundColor: '#222',
+    borderRadius: 20,
+    padding: 15,
+    paddingLeft: 100,
+    minHeight: 130,
+    justifyContent: 'center',
+  },
+  currentLessonCardGlow: {
+    borderColor: '#388e3c',
+    borderWidth: 1,
+    shadowColor: '#388e3c',
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 10,
+  },
+  mascot: {
+    position: 'absolute',
+    left: 0,
+    top: -20,
+    zIndex: 5,
+  },
+  lessonInfo: {
+    flex: 1,
+  },
+  currentLessonTitle: {
+    color: '#9E9E9E',
+    fontSize: 12,
+    fontFamily: PIXEL_FONT,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  lessonRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#424242',
+    marginBottom: 5,
   },
-  statLabel: {
+  lessonNumber: {
     color: 'white',
+    fontSize: 70,
     fontFamily: PIXEL_FONT,
-    fontSize: 10,
-    marginBottom: 8,
+    lineHeight: 70,
+    marginRight: 10,
   },
-  statValue: {
-    color: 'white',
-    fontFamily: PIXEL_FONT,
-    fontSize: 48,
+  lessonDetails: {
+    flex: 1,
   },
-  // Reward Root
-  rewardRootTitle: {
+  lessonTitle: {
     color: 'white',
-    fontFamily: PIXEL_FONT,
-    fontSize: 14,
-    textAlign: 'center',
-    marginTop: 32,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  pointsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 8,
+    alignSelf: 'flex-start',
+  },
+  coinIcon: {
+    marginRight: 4,
+  },
+  pointsText: {
+    color: '#FDD835',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  lessonDescription: {
+    color: '#B0B0B0',
+    fontSize: 12,
+  },
+  // --- Grid Styles ---
+  gridContainer: {
+    width: '100%',
+  },
+  gridRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 16,
   },
-  rootContainer: {
-    backgroundColor: '#4E342E',
-    borderRadius: 24,
-    borderWidth: 4,
-    borderColor: '#3E2723',
-    padding: 16,
-    minHeight: 500,
-    alignItems: 'center',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  rootTrunk: {
-    width: 12,
-    backgroundColor: '#795548',
-    height: '100%',
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-  },
-  sproutContainer: {
-    position: 'absolute',
-    bottom: -8,
-    zIndex: 1,
-  },
-  nodeWrapperView: {
-    position: 'absolute',
-    top: 40,
-    bottom: 40,
-    left: 16,
-    right: 16,
-  },
-  // Reward Node
-  node: {
-    position: 'absolute',
-    width: '50%',
-    height: 90,
-  },
-  nodeLeft: {
-    right: '50%',
-  },
-  nodeRight: {
-    left: '50%',
-  },
-  branch: {
-    position: 'absolute',
-    height: 8,
-    backgroundColor: '#795548',
-    width: 70,
-    top: '50%',
-    marginTop: -4,
-    zIndex: 0,
-  },
-  branchLeft: {
-    right: 0,
-  },
-  branchRight: {
-    left: 0,
-  },
-  branchTurquoise: {
-    backgroundColor: '#4DD0E1',
-    height: 10,
-  },
-  nodeContent: {
-    position: 'absolute',
-    flexDirection: 'row',
-    alignItems: 'center',
-    top: '50%',
-    marginTop: -28,
-    gap: 8,
-    zIndex: 2,
-  },
-  nodeContentLeft: {
-    right: 80,
-    flexDirection: 'row-reverse',
-  },
-  nodeContentRight: {
-    left: 80,
-  },
-  nodeIconContainer: {
-    width: 56,
-    height: 56,
-    backgroundColor: '#2C2C2E',
-    borderRadius: 8,
+  // Base style for all buttons
+  buttonBase: {
+    borderRadius: 20,
     borderWidth: 2,
-    borderColor: '#424242',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+    marginHorizontal: 8, // Add consistent margin
   },
-  nodeTextContainer: {
-    alignItems: 'flex-start',
+  // Style for the top row (squares)
+  buttonSquare: {
+    flex: 1,
+    aspectRatio: 1,
   },
-  nodeTextContainerLeft: {
-    alignItems: 'flex-end', 
-  },
-  nodePointsContainer: {
+  // Style for the bottom row (rectangles)
+  buttonRect: {
+    flex: 1, // Full width
+    height: 120,
     flexDirection: 'row',
-    alignItems: 'center',
-  },
-  nodePoints: {
-    color: '#F1B301',
-    fontFamily: PIXEL_FONT,
-    fontSize: 14,
-  },
-  nodeCoinIcon: {
-    marginLeft: 4,
-  },
-  nodeText: {
-    color: 'white',
-    fontFamily: PIXEL_FONT,
-    fontSize: 10,
-    marginTop: 4,
-  },
-  checkmark: {
-    position: 'absolute',
-    top: -8,
-    right: -8,
-    width: 24,
-    height: 24,
-    backgroundColor: 'white',
-    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  // --- Staggering nodes (These are now used) ---
-  nodeWrapperView_node_1: {
-    top: 40,
+  // Base text style
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontFamily: PIXEL_FONT,
   },
-  nodeWrapperView_node_2: {
-    top: 150,
+  // Text for squares
+  squareButtonText: {
+    fontSize: 14,
+    marginTop: 10,
+    textAlign: 'center',
   },
-  nodeWrapperView_node_3: {
-    top: 260,
+  // Text for rectangles
+  rectButtonText: {
+    fontSize: 20,
+    marginLeft: 16,
   },
-  nodeWrapperView_node_4: {
-    top: 370,
+  // Specific Button Colors
+  questsButton: {
+    backgroundColor: 'rgba(74, 20, 140, 0.5)',
+    borderColor: '#4A148C',
+  },
+  leaderboardButton: {
+    backgroundColor: 'rgba(253, 216, 53, 0.2)',
+    borderColor: '#FDD835',
+  },
+  rewardsButton: {
+    backgroundColor: 'rgba(194, 24, 91, 0.5)',
+    borderColor: '#C2185B',
+  },
+  lessonsButton: {
+    backgroundColor: 'rgba(56, 142, 60, 0.5)',
+    borderColor: '#388e3c',
+  },
+  marketButton: {
+    backgroundColor: 'rgba(2, 119, 189, 0.5)', // Blue
+    borderColor: '#0277BD',
   },
 });
