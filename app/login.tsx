@@ -11,15 +11,12 @@ import {
   View,
 } from 'react-native';
 
-// Import Supabase client (Make sure you created lib/supabase.ts!)
-import { supabase } from '../lib/supabase';
-
 // Import the SVG with the correct name
 import UserIcon from '../assets/images/user.svg';
 
 // --- OTP OVERLAY COMPONENT ---
 interface OtpOverlayProps {
-  onConfirm: (code: string) => void; // Updated to accept the code string
+  onConfirm: () => void; 
   onClose: () => void;
   mobileNo: string;
 }
@@ -45,12 +42,9 @@ const OtpOverlay: React.FC<OtpOverlayProps> = ({ onConfirm, onClose, mobileNo })
     }
   };
   
-  const handleResendOtp = async () => {
+  const handleResendOtp = () => {
       if (timer === 0) {
           console.log(`Resending OTP to ${mobileNo}...`);
-          // Optional: Add actual resend logic here via Supabase if desired
-          /* await supabase.auth.signInWithOtp({ phone: '+91' + mobileNo });
-          */
           setTimer(30); // Reset timer
       }
   };
@@ -93,8 +87,7 @@ const OtpOverlay: React.FC<OtpOverlayProps> = ({ onConfirm, onClose, mobileNo })
             isOtpComplete ? overlayStyles.confirmButtonActive : overlayStyles.confirmButtonDisabled,
           ]}
           disabled={!isOtpComplete}
-          // FIX: Pass the joined OTP code back to the parent
-          onPress={() => onConfirm(otp.join(''))}>
+          onPress={onConfirm}>
           <Text style={overlayStyles.confirmButtonText}>CONFIRM</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleResendOtp} disabled={timer !== 0}>
@@ -120,58 +113,34 @@ export default function LoginScreen() {
   const [agriStackId, setAgriStackId] = useState('');
   const [showOtpOverlay, setShowOtpOverlay] = useState(false);
 
-  // 1. Handle Sending OTP via Supabase
-  const handleSendOTP = async () => {
+  const handleSendOTP = () => {
     if (mobileNo.length === 10) {
-      console.log('Sending OTP via Supabase...');
-      
-      const { error } = await supabase.auth.signInWithOtp({
-        phone: '+91' + mobileNo, // Ensure this matches your region format
-      });
-
-      if (error) {
-        console.error('Error sending OTP:', error.message);
-        Alert.alert('Error', error.message);
-      } else {
-        setShowOtpOverlay(true);
-      }
+        // Mock sending OTP
+        console.log('Sending OTP (Mock)...');
+        setShowOtpOverlay(true); 
     } else {
-      Alert.alert('Invalid Phone', 'Please enter a valid 10-digit mobile number');
+        Alert.alert('Invalid Phone', 'Please enter a valid 10-digit mobile number');
     }
   };
 
-  // 2. Handle Confirming OTP via Supabase
-  const handleOtpConfirmation = async (code: string) => {
-    console.log('Verifying OTP:', code);
-    
-    const { data: { session }, error } = await supabase.auth.verifyOtp({
-      phone: '+91' + mobileNo,
-      token: code,
-      type: 'sms',
-    });
-
-    if (error) {
-      console.error('Invalid OTP:', error.message);
-      Alert.alert('Error', 'Invalid OTP, please try again.');
-    } else {
-      console.log('Login successful!', session);
-      setShowOtpOverlay(false);
-      
-      // 3. Navigate to Lessons on success
-      router.replace({
-        pathname: '/lessons',
-        params: { lesson_completed: lesson_completed } // Pass forward any lesson params
-      }); 
-    }
-  };
-
-  // Placeholder for the main screen "Confirm" button (if needed separately)
   const handleConfirmLogin = () => {
-     console.log('Manual confirm pressed');
+    console.log('Logging in...');
+    // Pass the lesson_completed ID forward to the lessons page!
+    router.replace({
+      pathname: '/lessons',
+      params: { lesson_completed: lesson_completed } 
+    }); 
+  };
+  
+  const handleOtpConfirmation = () => {
+      // Mock verifying OTP
+      console.log('OTP Verified (Mock)');
+      setShowOtpOverlay(false); 
+      handleConfirmLogin(); 
   };
 
   const isSendOtpActive = mobileNo.length === 10;
-  const isFinalConfirmActive = false; // Placeholder logic
+  const isFinalConfirmActive = false; 
 
   return (
     <SafeAreaView style={styles.safeArea}>

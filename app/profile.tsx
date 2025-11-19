@@ -1,41 +1,14 @@
+import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-// Removed: import { SymbolView } from 'expo-symbols';
-import { StatusBar } from 'expo-status-bar';
 
 // --- Import SVG Assets ---
-// These files must exist in your assets/images/ folder
 import Banana from '../assets/images/Banana.svg';
 import Coin from '../assets/images/coin.svg';
 import FarmIcon from '../assets/images/farm.svg';
 import LeafIcon from '../assets/images/leafIcon.svg';
 import SusScore from '../assets/images/SusScore.svg';
 import UserImage from '../assets/images/UserImage.svg';
-
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-
-// Inside component
-const [profile, setProfile] = useState(null);
-
-useEffect(() => {
-  async function getProfile() {
-    // Get current logged in user
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (user) {
-      // Fetch their specific row from the 'profiles' table
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      
-      setProfile(data);
-    }
-  }
-  getProfile();
-}, []);
 
 // InfoBox helper
 const InfoBox = ({ label, value, icon }: { label: string, value: string, icon?: string }) => (
@@ -53,9 +26,6 @@ export default function ProfileScreen() {
     // Use SafeAreaView as the root
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
-
-      {/* --- Header (REMOVED) --- */}
-      {/* The global header from app/_layout.tsx will appear here automatically */}
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* --- Profile Picture --- */}
@@ -124,26 +94,23 @@ export default function ProfileScreen() {
   );
 }
 
-// --- Styles (Fixed) ---
+// --- Styles ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1C1C1E',
   },
-  // --- Header styles removed ---
   scrollContainer: {
     paddingHorizontal: 16,
     paddingBottom: 40,
-    // Added padding to clear the global header
     paddingTop: 20,
   },
-  UserImageContainer: { // Fixed style name
+  UserImageContainer: {
     alignItems: 'center',
-    // Removed marginTop
     marginBottom: -64,
     zIndex: 1,
   },
-  UserImage: { // Fixed style name
+  UserImage: {
     borderRadius: 64,
     borderWidth: 4,
     borderColor: 'white',
@@ -175,7 +142,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 4,
   },
-  Banana: { // Fixed style name
+  Banana: {
     marginLeft: 16,
   },
   addressContainer: {
