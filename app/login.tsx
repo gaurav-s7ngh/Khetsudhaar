@@ -1,6 +1,7 @@
-import { useRouter, useLocalSearchParams } from 'expo-router'; // Import useLocalSearchParams
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  Alert,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -10,15 +11,15 @@ import {
   View,
 } from 'react-native';
 
-// --- FIX 1 ---
-// Import the SVG with the correct name: user.svg
+// Import Supabase client (Make sure you created lib/supabase.ts!)
+import { supabase } from '../lib/supabase';
+
+// Import the SVG with the correct name
 import UserIcon from '../assets/images/user.svg';
-// -------------
 
 // --- OTP OVERLAY COMPONENT ---
-// (This code from your friend is great, no changes needed here)
 interface OtpOverlayProps {
-  onConfirm: () => void;
+  onConfirm: (code: string) => void; // Updated to accept the code string
   onClose: () => void;
   mobileNo: string;
 }
@@ -44,9 +45,12 @@ const OtpOverlay: React.FC<OtpOverlayProps> = ({ onConfirm, onClose, mobileNo })
     }
   };
   
-  const handleResendOtp = () => {
+  const handleResendOtp = async () => {
       if (timer === 0) {
           console.log(`Resending OTP to ${mobileNo}...`);
+          // Optional: Add actual resend logic here via Supabase if desired
+          /* await supabase.auth.signInWithOtp({ phone: '+91' + mobileNo });
+          */
           setTimer(30); // Reset timer
       }
   };
@@ -89,7 +93,8 @@ const OtpOverlay: React.FC<OtpOverlayProps> = ({ onConfirm, onClose, mobileNo })
             isOtpComplete ? overlayStyles.confirmButtonActive : overlayStyles.confirmButtonDisabled,
           ]}
           disabled={!isOtpComplete}
-          onPress={onConfirm}>
+          // FIX: Pass the joined OTP code back to the parent
+          onPress={() => onConfirm(otp.join(''))}>
           <Text style={overlayStyles.confirmButtonText}>CONFIRM</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleResendOtp} disabled={timer !== 0}>
@@ -115,30 +120,58 @@ export default function LoginScreen() {
   const [agriStackId, setAgriStackId] = useState('');
   const [showOtpOverlay, setShowOtpOverlay] = useState(false);
 
-  const handleSendOTP = () => {
+  // 1. Handle Sending OTP via Supabase
+  const handleSendOTP = async () => {
     if (mobileNo.length === 10) {
-        setShowOtpOverlay(true); 
-        console.log('Sending OTP...');
+      console.log('Sending OTP via Supabase...');
+      
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: '+91' + mobileNo, // Ensure this matches your region format
+      });
+
+      if (error) {
+        console.error('Error sending OTP:', error.message);
+        Alert.alert('Error', error.message);
+      } else {
+        setShowOtpOverlay(true);
+      }
+    } else {
+      Alert.alert('Invalid Phone', 'Please enter a valid 10-digit mobile number');
     }
   };
 
-  const handleConfirmLogin = () => {
-    console.log('Logging in...');
-    // Pass the lesson_completed ID forward to the lessons page!
-    router.replace({
-      pathname: '/lessons',
-      params: { lesson_completed: lesson_completed } // e.g., lesson_completed=1
-    }); 
+  // 2. Handle Confirming OTP via Supabase
+  const handleOtpConfirmation = async (code: string) => {
+    console.log('Verifying OTP:', code);
+    
+    const { data: { session }, error } = await supabase.auth.verifyOtp({
+      phone: '+91' + mobileNo,
+      token: code,
+      type: 'sms',
+    });
+
+    if (error) {
+      console.error('Invalid OTP:', error.message);
+      Alert.alert('Error', 'Invalid OTP, please try again.');
+    } else {
+      console.log('Login successful!', session);
+      setShowOtpOverlay(false);
+      
+      // 3. Navigate to Lessons on success
+      router.replace({
+        pathname: '/lessons',
+        params: { lesson_completed: lesson_completed } // Pass forward any lesson params
+      }); 
+    }
   };
-  
-  const handleOtpConfirmation = () => {
-      // API call to verify OTP would happen here
-      setShowOtpOverlay(false); 
-      handleConfirmLogin(); 
+
+  // Placeholder for the main screen "Confirm" button (if needed separately)
+  const handleConfirmLogin = () => {
+     console.log('Manual confirm pressed');
   };
 
   const isSendOtpActive = mobileNo.length === 10;
-  const isFinalConfirmActive = false; // This is fine, it's just a placeholder
+  const isFinalConfirmActive = false; // Placeholder logic
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -146,12 +179,9 @@ export default function LoginScreen() {
         <Text style={styles.title}>LOGIN</Text>
         
         <View style={styles.avatarContainer}>
-          {/* --- USE THE CORRECT SVG --- */}
           <UserIcon width={100} height={100} /> 
-          {/* --------------------------- */}
         </View>
 
-        {/* Input fields... */}
         <Text style={styles.inputLabel}>FULL NAME</Text>
         <TextInput
           style={styles.input}
@@ -181,7 +211,6 @@ export default function LoginScreen() {
           onChangeText={setAgriStackId}
         />
 
-        {/* Send OTP Button */}
         <TouchableOpacity 
           style={[
             styles.sendOtpButton,
@@ -192,7 +221,6 @@ export default function LoginScreen() {
           <Text style={styles.sendOtpButtonText}>SEND OTP</Text>
         </TouchableOpacity>
 
-        {/* Account Link and Data Note */}
         <View style={styles.accountLinkContainer}>
           <Text style={styles.accountLinkText}>Don't have an account?</Text>
           <TouchableOpacity onPress={() => console.log('Navigate to Create one')}>
@@ -202,7 +230,6 @@ export default function LoginScreen() {
 
         <Text style={styles.dataNote}>DATA AS PER FARMER REGISTRY 2025</Text>
 
-        {/* Confirm Button */}
         <TouchableOpacity
           style={[
             styles.confirmButton,
@@ -215,7 +242,6 @@ export default function LoginScreen() {
         
       </ScrollView>
       
-      {/* RENDER OTP OVERLAY */}
       {showOtpOverlay && (
         <OtpOverlay 
             onConfirm={handleOtpConfirmation} 
@@ -227,7 +253,7 @@ export default function LoginScreen() {
   );
 }
 
-// Styles are the same
+// --- Styles ---
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
